@@ -10,23 +10,29 @@ import UIKit
 import MapKit
 import CoreLocation
 
-class MapViewViewController: UIViewControllera {
+class MapViewViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     
     let locationManager = CLLocationManager()
     let regionInMeters: Double = 10000
+    var userLocation = CLLocation()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: 59.9082, longitude: 30.3097)
-        mapView.addAnnotation(annotation)
-        
+        setMarkers()
         checkLocationServices()
     }
     
+    func setMarkers() {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: 59.9082, longitude: 30.3097)
+        mapView.addAnnotation(annotation)
+        let anotationLocation = CLLocation(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
+        let distanceInMeters = anotationLocation.distance(from: userLocation)
+        print(distanceInMeters)
+    }
+     
     func setupLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -35,6 +41,7 @@ class MapViewViewController: UIViewControllera {
         
     func centerViewOnUserLocation() {
         if let location = locationManager.location?.coordinate {
+            userLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
             let region = MKCoordinateRegion.init(center: location, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
             mapView.setRegion(region, animated: true)
         }
