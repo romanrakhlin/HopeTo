@@ -14,6 +14,13 @@ class MapViewViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     
+    var num1: [CLLocation : [String: String]] = [CLLocation(latitude: 59.9082, longitude: 30.3097) : ["Title" : "Здание 1", "Description" : "крутой дом", "interest" : "10"]]
+    var num2: [CLLocation : [String: String]] = [CLLocation(latitude: 58.9082, longitude: 30.3097) : ["Title" : "Здание 2", "Description" : "крутой дом", "interest" : "5"]]
+    var num3: [CLLocation : [String: String]] = [CLLocation(latitude: 57.9082, longitude: 30.3097) : ["Title" : "Здание 3", "Description" : "крутой дом", "interest" : "0"]]
+    var num4: [CLLocation : [String: String]] = [CLLocation(latitude: 80.9082, longitude: 30.3097) : ["Title" : "Здание 4", "Description" : "крутой дом", "interest" : "10"]]
+    
+    //let nums = [num1, num2, num3, num4]
+    
     let locationManager = CLLocationManager()
     let regionInMeters: Double = 10000
     var userLocation = CLLocation()
@@ -22,6 +29,8 @@ class MapViewViewController: UIViewController {
         super.viewDidLoad()
         setMarkers()
         checkLocationServices()
+        
+        
     }
     
     func setMarkers() {
