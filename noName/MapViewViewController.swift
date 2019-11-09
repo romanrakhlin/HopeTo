@@ -12,14 +12,15 @@ import CoreLocation
 
 class MapViewViewController: UIViewController {
     
+    @IBOutlet var InfoView: UIView!
     @IBOutlet weak var mapView: MKMapView!
     
-    var num1: [CLLocation : [String: String]] = [CLLocation(latitude: 59.9082, longitude: 30.3097) : ["Title" : "Здание 1", "Description" : "крутой дом", "interest" : "10"]]
-    var num2: [CLLocation : [String: String]] = [CLLocation(latitude: 58.9082, longitude: 30.3097) : ["Title" : "Здание 2", "Description" : "крутой дом", "interest" : "5"]]
-    var num3: [CLLocation : [String: String]] = [CLLocation(latitude: 57.9082, longitude: 30.3097) : ["Title" : "Здание 3", "Description" : "крутой дом", "interest" : "0"]]
-    var num4: [CLLocation : [String: String]] = [CLLocation(latitude: 80.9082, longitude: 30.3097) : ["Title" : "Здание 4", "Description" : "крутой дом", "interest" : "10"]]
-    
-    //let nums = [num1, num2, num3, num4]
+    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
+    var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
+    var num3: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
+    var num4: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
+
+    var places: [[String: Any]] = []
     
     let locationManager = CLLocationManager()
     let regionInMeters: Double = 10000
@@ -27,6 +28,7 @@ class MapViewViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.places = [num1,num2,num3,num4]
         setMarkers()
         checkLocationServices()
         
@@ -66,7 +68,21 @@ class MapViewViewController: UIViewController {
         }
     }
         
+    @IBAction func allerOpen(_ sender: Any) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
+        let yes = UIAlertAction(title: "Иду", style: .default) { (action) in
+            //меняем кнопки
+        }
+        
+        let no = UIAlertAction(title: "Не иду", style: .cancel, handler: nil)
+        
+        alert.addAction(yes)
+        alert.addAction(no)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     func checkLocationAuthorization() {
         switch CLLocationManager.authorizationStatus() {
         case .authorizedWhenInUse:
@@ -86,6 +102,34 @@ class MapViewViewController: UIViewController {
             break
         }
     }
+    
+    func getNearestPlace() -> [String: Any]? {
+        let nearest: CLLocationDistance = 1000
+        var nearestPlace = [[String: Any]]()
+        for place in places{
+            let placeCoordinat = place["location"] as! CLLocation
+            let distanceInMeters = placeCoordinat.distance(from: userLocation)
+            
+            if distanceInMeters < nearest{
+                nearestPlace.append(place)
+            }
+        }
+        var maxInter = 0
+        var placeInter: [String: Any]?
+        for place in nearestPlace{
+            if (place["interest"] as! Int) > maxInter{
+                maxInter = place["interest"] as! Int
+                placeInter = place
+            }
+        }
+        if placeInter != nil {
+            return placeInter
+        } else{
+            return nil
+        }
+    }
+    
+    
 }
 
 
@@ -95,11 +139,20 @@ extension MapViewViewController: CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         let region = MKCoordinateRegion.init(center: location.coordinate, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
         mapView.setRegion(region, animated: true)
+        print(self.getNearestPlace(),"Локация рядом")
     }
     
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         checkLocationAuthorization()
+    }
+    
+    func showPlace(){
+        let place = self.getNearestPlace()
+        if place == nil{
+            return
+        }
+        //показываем анотация по place
     }
 }
 
