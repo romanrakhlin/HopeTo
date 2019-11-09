@@ -7,13 +7,28 @@
 //
 
 import UIKit
-import CoreLocation
+import WebKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WKUIDelegate {
     
-     override func viewDidLoad() {
+    var webView: WKWebView!
+    
+    override func loadView() {
+        let webConfiguration = WKWebViewConfiguration()
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webView.uiDelegate = self
+        view = webView
+    }
+    
+    override func viewDidLoad() {
          super.viewDidLoad()
+        let myURL = URL(string: "http://www.instagram.com")
+        let myRequest = URLRequest(url: myURL!)
+        webView.load(myRequest)
      }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
 }
-
 
