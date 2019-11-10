@@ -15,7 +15,9 @@ class MapViewViewController: UIViewController {
     @IBOutlet var InfoView: UIView!
     @IBOutlet weak var mapView: MKMapView!
     
-    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
+    var currentLocation: MKUserLocation?
+    
+    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
     var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
     var num3: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
     var num4: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
@@ -25,19 +27,35 @@ class MapViewViewController: UIViewController {
     let locationManager = CLLocationManager()
     let regionInMeters: Double = 10000
     var userLocation = CLLocation()
+    var annotation: MKPlacemark?
+     var gameTimer: Timer?
+    
+    @IBOutlet weak var name: UILabel!
+    @IBOutlet weak var peopleCount: UILabel!
+    @IBOutlet weak var time: UILabel!
+    @IBOutlet weak var descrip: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.places = [num1,num2,num3,num4]
+        self.mapView.delegate = self
+        self.mapView.showsUserLocation = true
+        
+       
+        
+        gameTimer = Timer.scheduledTimer(timeInterval: 30, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+        
         setMarkers()
         checkLocationServices()
-        
-        
+    
     }
     
+    @objc func runTimedCode(){
+        self.places = [num1,num2,num3,num4]
+    }
+
     func setMarkers() {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: 59.9082, longitude: 30.3097)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: 59.9082, longitude: 30.34157)
         mapView.addAnnotation(annotation)
         let anotationLocation = CLLocation(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
         let distanceInMeters = anotationLocation.distance(from: userLocation)
@@ -46,7 +64,7 @@ class MapViewViewController: UIViewController {
      
     func setupLocationManager() {
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters//kCLLocationAccuracyBest
     }
         
         
@@ -71,11 +89,24 @@ class MapViewViewController: UIViewController {
     @IBAction func allerOpen(_ sender: Any) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let yes = UIAlertAction(title: "Иду", style: .default) { (action) in
-            //меняем кнопки
+        let yes = UIAlertAction(title: "Я пришел", style: .default) { (action) in
+            let alertDelete = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                let openAr = UIAlertAction(title: "Открыть Ar", style: .default) { (action) in
+                    
+                }
+                let close = UIAlertAction(title: "Тут не интересно", style: .cancel, handler: nil)
+                
+                alertDelete.addAction(openAr)
+                alertDelete.addAction(close)
+                
+                self.present(alertDelete, animated: true, completion: nil)
+            
         }
         
-        let no = UIAlertAction(title: "Не иду", style: .cancel, handler: nil)
+        let no = UIAlertAction(title: "Не пойду", style: .cancel){ (action) in
+//            self.locationManager.stopUpdatingLocation()
+            self.mapView.removeAnnotation(self.annotation!)
+        }
         
         alert.addAction(yes)
         alert.addAction(no)
@@ -104,7 +135,7 @@ class MapViewViewController: UIViewController {
     }
     
     func getNearestPlace() -> [String: Any]? {
-        let nearest: CLLocationDistance = 1000
+        let nearest: CLLocationDistance = 10000
         var nearestPlace = [[String: Any]]()
         for place in places{
             let placeCoordinat = place["location"] as! CLLocation
@@ -129,17 +160,20 @@ class MapViewViewController: UIViewController {
         }
     }
     
-    
 }
 
 
-extension MapViewViewController: CLLocationManagerDelegate {
+extension MapViewViewController: CLLocationManagerDelegate, MKMapViewDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        self.locationManager.stopUpdatingLocation()
         guard let location = locations.last else { return }
-        let region = MKCoordinateRegion.init(center: location.coordinate, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
-        mapView.setRegion(region, animated: true)
+        
+//        let region = MKCoordinateRegion.init(center: location.coordinate, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
+//        mapView.setRegion(region, animated: true)
         print(self.getNearestPlace(),"Локация рядом")
+        self.showPlace()
+        
     }
     
     
@@ -148,11 +182,82 @@ extension MapViewViewController: CLLocationManagerDelegate {
     }
     
     func showPlace(){
-        let place = self.getNearestPlace()
-        if place == nil{
-            return
+//        guard let place = self.getNearestPlace() else { return }
+        
+        let place: [String: Any]
+        if self.getNearestPlace() != nil {
+            place = self.getNearestPlace()!
+        }else{
+            place = self.num1
         }
-        //показываем анотация по place
+        let coordinate: CLLocation = place["location"] as! CLLocation
+
+        let nearPlacemark = MKPlacemark(coordinate: coordinate.coordinate)
+        let userPlaceMark = MKPlacemark(coordinate: userLocation.coordinate)
+        let nearPlacemarkItem = MKMapItem(placemark: nearPlacemark)
+        let userPlaceMarkItem = MKMapItem(placemark: userPlaceMark)
+        
+        
+        let request = MKDirections.Request()
+        request.source = nearPlacemarkItem
+        request.destination = userPlaceMarkItem
+        request.requestsAlternateRoutes = true
+        request.transportType = .automobile
+
+        let directions = MKDirections(request: request)
+
+        directions.calculate { [unowned self] response, error in
+            guard let unwrappedResponse = response else { return }
+
+            for route in unwrappedResponse.routes {
+                self.mapView.addOverlay(route.polyline)
+                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, animated: true)
+            }
+        }
+        
+        self.name.text = (place["Title"] as! String)
+        self.descrip.text  = (place["Description"] as! String)
+        self.peopleCount.text = "За последнюю неделю \n посетило 6 человек \(Int.random(in: 1...15))"
+        
+        self.annotation = userPlaceMark
+    
+    }
+
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        let renderer = MKPolylineRenderer(overlay: overlay)
+        renderer.strokeColor = .lightGray
+        renderer.lineWidth = 4.0
+    
+        return renderer
+    }
+    
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+
+        currentLocation = userLocation
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        guard !annotation.isKind(of: MKUserLocation.self) else {
+
+            return nil
+        }
+        
+        let reuseIdentifier = "pin"
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
+
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+            annotationView?.canShowCallout = true
+        } else {
+            annotationView?.annotation = annotation
+        }
+        
+        let image = UIImage(named: "point")
+//        image?. size = CGSize(width: (image?.size.width ?? 25) * 2, height: (image?.size.height ?? 25) * 2)
+        annotationView?.image = image
+        
+
+        return annotationView
     }
 }
-
