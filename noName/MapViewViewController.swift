@@ -12,15 +12,15 @@ import CoreLocation
 
 class MapViewViewController: UIViewController {
     
+    let show = false
+    
     @IBOutlet var InfoView: UIView!
     @IBOutlet weak var mapView: MKMapView!
     
-    var currentLocation: MKUserLocation?
-    
-    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
-    var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
-    var num3: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
-    var num4: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
+    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
+    var num2: [String: Any] = ["location" : CLLocation(latitude: 124.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
+    var num3: [String: Any] = ["location" : CLLocation(latitude: 103.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
+    var num4: [String: Any] = ["location" : CLLocation(latitude: 119.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
 
     var places: [[String: Any]] = []
     
@@ -54,12 +54,16 @@ class MapViewViewController: UIViewController {
     }
 
     func setMarkers() {
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: 59.9082, longitude: 30.34157)
-        mapView.addAnnotation(annotation)
-        let anotationLocation = CLLocation(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
-        let distanceInMeters = anotationLocation.distance(from: userLocation)
-        print(distanceInMeters)
+        var annotations = [MKAnnotation]()
+        for place in places {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = (place["location"] as! CLLocation).coordinate
+            annotations.append(annotation)
+        }
+        mapView.addAnnotations(annotations)
+//        let anotationLocation = CLLocation(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
+//        let distanceInMeters = anotationLocation.distance(from: userLocation)
+//        print(distanceInMeters)
     }
      
     func setupLocationManager() {
