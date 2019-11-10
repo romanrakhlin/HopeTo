@@ -17,7 +17,7 @@ class MapViewViewController: UIViewController {
     
     var currentLocation: MKUserLocation?
     
-    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Здание 1", "Description" : "крутой дом", "interest" : 10]
+    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Графити основателя яндекс", "Description" : "Одно из творений \n коллектива художников/n Hoodgraff запечатлило /n Nлью Сегаловича сопровождается \n  мотивирующей цитатой основателя.ь ", "interest" : 10]
     var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
     var num3: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
     var num4: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
@@ -27,7 +27,6 @@ class MapViewViewController: UIViewController {
     let locationManager = CLLocationManager()
     let regionInMeters: Double = 10000
     var userLocation = CLLocation()
-    var annotation: MKPlacemark?
      var gameTimer: Timer?
     
     @IBOutlet weak var name: UILabel!
@@ -37,6 +36,8 @@ class MapViewViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.name.isHidden = true
+        
         self.mapView.delegate = self
         self.mapView.showsUserLocation = true
         
@@ -51,6 +52,8 @@ class MapViewViewController: UIViewController {
     
     @objc func runTimedCode(){
         self.places = [num1,num2,num3,num4]
+        self.name.isHidden = false
+        self.showPlace()
     }
 
     func setMarkers() {
@@ -105,7 +108,7 @@ class MapViewViewController: UIViewController {
         
         let no = UIAlertAction(title: "Не пойду", style: .cancel){ (action) in
 //            self.locationManager.stopUpdatingLocation()
-            self.mapView.removeAnnotation(self.annotation!)
+
         }
         
         alert.addAction(yes)
@@ -135,7 +138,7 @@ class MapViewViewController: UIViewController {
     }
     
     func getNearestPlace() -> [String: Any]? {
-        let nearest: CLLocationDistance = 10000
+        let nearest: CLLocationDistance = 1000000000000000000
         var nearestPlace = [[String: Any]]()
         for place in places{
             let placeCoordinat = place["location"] as! CLLocation
@@ -188,7 +191,8 @@ extension MapViewViewController: CLLocationManagerDelegate, MKMapViewDelegate {
         if self.getNearestPlace() != nil {
             place = self.getNearestPlace()!
         }else{
-            place = self.num1
+            locationManager.stopUpdatingLocation()
+            return
         }
         let coordinate: CLLocation = place["location"] as! CLLocation
 
@@ -219,7 +223,7 @@ extension MapViewViewController: CLLocationManagerDelegate, MKMapViewDelegate {
         self.descrip.text  = (place["Description"] as! String)
         self.peopleCount.text = "За последнюю неделю \n посетило 6 человек \(Int.random(in: 1...15))"
         
-        self.annotation = userPlaceMark
+
     
     }
 
