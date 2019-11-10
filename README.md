@@ -1,3 +1,3 @@
 # HopeTo
 
-![image](./img.jpg)
+![image](./img)
