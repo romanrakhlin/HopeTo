@@ -106,6 +106,7 @@
                     <connections>
                         <outlet property="InfoView" destination="8bC-Xf-vdC" id="PdL-Fu-gZc"/>
                         <outlet property="descrip" destination="Vis-3K-Mg5" id="OpP-84-em8"/>
+                        <outlet property="infoView" destination="efp-Qa-Uqo" id="41R-cC-YH8"/>
                         <outlet property="mapView" destination="BUP-fK-lID" id="itZ-QR-mAU"/>
                         <outlet property="name" destination="zgE-tk-p3B" id="T2a-7G-ZXD"/>
                         <outlet property="peopleCount" destination="5UE-jV-hyE" id="565-KP-oFX"/>

@@ -14,13 +14,14 @@ class MapViewViewController: UIViewController {
     
     let show = false
     
-    @IBOutlet var InfoView: UIView!
+
+    @IBOutlet weak var infoView: UIView!
     @IBOutlet weak var mapView: MKMapView!
     
     var currentLocation: MKUserLocation?
     
-    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Графити основателя яндекс", "Description" : "Одно из творений \n коллектива художников/n Hoodgraff запечатлило /n Nлью Сегаловича сопровождается \n  мотивирующей цитатой основателя.ь ", "interest" : 10]
-    var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097),"Title" : "Здание 2", "Description" : "крутой дом", "interest" : 5]
+    var num1: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3415),  "Title" : "Графити основателя яндекс", "Description" : "Одно из творений \n коллектива художников/n Hoodgraff запечатлило /n Nлью Сегаловича сопровождается \n  мотивирующей цитатой основателя.", "interest" : 10]
+    var num2: [String: Any] = ["location" : CLLocation(latitude: 59.9489, longitude : 30.39545),"Title" : "Северо-Восточная башня бывшего Смольного Собора", "Description" : "Прежде в ней распологалась церковь вмц. Екатерины", "interest" : 5]
     var num3: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 3", "Description" : "крутой дом", "interest" : 0]
     var num4: [String: Any] = ["location" : CLLocation(latitude: 59.9082, longitude : 30.3097), "Title" : "Здание 4", "Description" : "крутой дом", "interest" : 10]
 
@@ -39,22 +40,30 @@ class MapViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.name.isHidden = true
+        self.infoView.isHidden = true
+        self.peopleCount.isHidden = true
+        self.time.isHidden = true
+        self.descrip.isHidden = true
         
         self.mapView.delegate = self
         self.mapView.showsUserLocation = true
-        
-       
         
         gameTimer = Timer.scheduledTimer(timeInterval: 30, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
         
         setMarkers()
         checkLocationServices()
+        
+        notif()
     
     }
     
     @objc func runTimedCode(){
         self.places = [num1,num2,num3,num4]
         self.name.isHidden = false
+        self.infoView.isHidden = false
+        self.peopleCount.isHidden = false
+        self.time.isHidden = false
+        self.descrip.isHidden = false
         self.showPlace()
     }
 
@@ -71,6 +80,32 @@ class MapViewViewController: UIViewController {
 //        print(distanceInMeters)
     }
      
+    func notif() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) {
+            (granted, error) in
+            
+        }
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Hey there! 🔥🔥"
+        content.body = "🙀Do you want to know what time you need to wake up tomorrow!?!"
+        
+        let date = Date()
+        var dateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        
+        dateComponents.hour = 21
+        dateComponents.minute = 00
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let uuisString = UUID().uuidString
+        let request = UNNotificationRequest(identifier: uuisString, content: content, trigger: trigger)
+        
+        center.add(request) { (error) in
+        }
+    }
+    
     func setupLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters//kCLLocationAccuracyBest
