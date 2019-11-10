@@ -94,8 +94,8 @@ class MapViewViewController: UIViewController {
         let date = Date()
         var dateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
         
-        dateComponents.hour = 21
-        dateComponents.minute = 00
+        dateComponents.hour = 10
+        dateComponents.minute = 35
         
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         
