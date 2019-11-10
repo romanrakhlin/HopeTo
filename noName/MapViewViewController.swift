@@ -95,7 +95,11 @@ class MapViewViewController: UIViewController {
         let yes = UIAlertAction(title: "Я пришел", style: .default) { (action) in
             let alertDelete = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 let openAr = UIAlertAction(title: "Открыть Ar", style: .default) { (action) in
-                    
+                    UIView.animate(withDuration: 0.4) {
+                        let blur = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffect.Style.dark))
+                        self.view.addSubview(blur)
+                        blur.frame = self.view.frame
+                    }
                 }
                 let close = UIAlertAction(title: "Тут не интересно", style: .cancel, handler: nil)
                 
